@@ -630,7 +630,7 @@ jobs:
   final-summary:
     name: 🎯 Final CI/CD Summary
     runs-on: ubuntu-latest
-    needs: [api-tests, performance-benchmark, deploy-docs, create-release]
+    needs: [api-tests, performance-benchmark, deploy-docs]
     if: always()
     timeout-minutes: 3
     
@@ -680,11 +680,7 @@ jobs:
             echo "❌ **Documentation:** Deployment Failed" >> $GITHUB_STEP_SUMMARY
           fi
           
-          if [ "${{ needs.create-release.result }}" = "success" ]; then
-            echo "✅ **Release:** Created Successfully" >> $GITHUB_STEP_SUMMARY
-          else
-            echo "⚠️ **Release:** Not Created" >> $GITHUB_STEP_SUMMARY
-          fi
+          echo "ℹ️ **Release:** Skipped (runs only on main branch releases)" >> $GITHUB_STEP_SUMMARY
           
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "## 🎯 **Overall Status**" >> $GITHUB_STEP_SUMMARY
@@ -696,11 +692,11 @@ jobs:
             echo "🎉 **🎯 EXCELLENT! Enhanced pipeline working perfectly!**" >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY
             echo "Your lightning-fast API testing framework is running with:" >> $GITHUB_STEP_SUMMARY
-            echo "- ⚡ **Latest Node.js 20 LTS** for 20-30% speed improvement" >> $GITHUB_STEP_SUMMARY
-            echo "- 📦 **npm 10** with enhanced package management" >> $GITHUB_STEP_SUMMARY
-            echo "- 🔧 **GitHub Actions v4** for better reliability" >> $GITHUB_STEP_SUMMARY
+            echo "- ⚡ **Latest Node.js 22** for maximum performance" >> $GITHUB_STEP_SUMMARY
+            echo "- 📦 **npm 11** with cutting-edge package management" >> $GITHUB_STEP_SUMMARY
+            echo "- 🔧 **GitHub Actions v4** for enhanced reliability" >> $GITHUB_STEP_SUMMARY
             echo "- 🎭 **Extended Browser Support** including WebKit" >> $GITHUB_STEP_SUMMARY
-            echo "- 🌍 **Cross-Platform Testing** on 3 operating systems" >> $GITHUB_STEP_SUMMARY
+            echo "- 🌍 **Cross-Platform Testing** on multiple operating systems" >> $GITHUB_STEP_SUMMARY
           else
             echo "⚠️ **Some critical jobs failed. Please check the logs above.**" >> $GITHUB_STEP_SUMMARY
           fi
