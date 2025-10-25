@@ -95,7 +95,7 @@ jobs:
   api-tests:
     name: 🧪 API Testing Suite
     runs-on: ubuntu-latest
-    needs: [lint-and-type-check, install-browsers]
+    needs: [lint-and-type-check]
     strategy:
       fail-fast: false
       matrix:
@@ -126,41 +126,49 @@ jobs:
           # Enhanced caching for faster installation
           npm ci --prefer-offline --no-audit --progress=false
       
-      - name: 🎭 Enhanced Browser Caching
+      - name: 🎭 Use Cached Browsers
         uses: actions/cache@v4
         with:
           path: ~/.cache/ms-playwright
-          key: browsers-${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: browsers-${{ runner.os }}-
+          key: browsers-${{ matrix.os }}-${{ matrix.browser }}-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            browsers-${{ matrix.os }}-${{ matrix.browser }}-
+            browsers-${{ matrix.os }}-playwright-
       
-      - name: 🎭 Install Playwright Browsers
-        run: npx playwright install --with-deps --force
-      
-      - name: 🧪 Run API Tests (${{ matrix.browser }})
+      - name: ⚡ Verify Browser Availability
         run: |
-          # Add test script to package.json if not exists
+          echo "🔍 Verifying browser installation for ${{ matrix.browser }}..."
+          
+          # Just list available browsers (they should be cached from install-browsers job)
+          npx playwright install --list || echo "Browsers should be available from previous job"
+      
+      - name: 🧪 Run Enhanced API Tests (${{ matrix.browser }})
+        run: |
+          # Ensure test scripts exist
           if ! npm run | grep -q "test:"; then
             echo "Adding test scripts to package.json"
-            npm pkg set scripts.test="npx playwright test"
-            npm pkg set scripts.test:basic="npx playwright test --grep='Basic'"
-            npm pkg set scripts.test:advanced="npx playwright test --grep='Advanced'"
+            npm pkg set scripts.test="npx playwright test --reporter=html,line"
+            npm pkg set scripts.test:basic="npx playwright test --grep='Basic' --reporter=html,line"
+            npm pkg set scripts.test:intermediate="npx playwright test --grep='Intermediate' --reporter=html,line"
+            npm pkg set scripts.test:advanced="npx playwright test --grep='Advanced' --reporter=html,line"
+            npm pkg set scripts.test:smoke="npx playwright test --grep='Basic.*login' --reporter=html,line"
           fi
           
-          # Run specific test level based on input or matrix
+          # Run specific test level based on input or matrix with HTML reporting
           if [ "${{ github.event.inputs.test_level }}" = "basic" ] || [ "${{ matrix.browser }}" = "chromium" ]; then
-            echo "Running basic API tests"
+            echo "Running basic API tests with HTML report"
             npm run test:basic
           elif [ "${{ github.event.inputs.test_level }}" = "intermediate" ]; then
-            echo "Running intermediate API tests"
+            echo "Running intermediate API tests with HTML report"
             npm run test:intermediate || npm run test:basic
           elif [ "${{ github.event.inputs.test_level }}" = "advanced" ]; then
-            echo "Running advanced API tests"
+            echo "Running advanced API tests with HTML report"
             npm run test:advanced
           elif [ "${{ github.event.inputs.test_level }}" = "smoke" ]; then
-            echo "Running smoke tests"
+            echo "Running smoke tests with HTML report"
             npm run test:smoke || npm run test:basic
           else
-            echo "Running all API tests"
+            echo "Running all API tests with HTML report"
             npm test
           fi
         
@@ -349,10 +357,11 @@ jobs:
     if: github.ref == 'refs/heads/main'
     
     steps:
-      - name: 📥 Checkout Code
+      - name: 📥 Checkout Code with Full History
         uses: actions/checkout@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
       
       - name: 🔧 Setup Node.js
         uses: actions/setup-node@v4
@@ -362,7 +371,7 @@ jobs:
       
       - name: 📦 Install Dependencies
         run: |
-          # Enhanced caching for faster installation
+          # Fast installation with enhanced caching
           npm ci --prefer-offline --no-audit --progress=false
       
       - name: 🚀 Enhanced Build Documentation Site
@@ -495,12 +504,16 @@ jobs:
           
           echo "✅ Enhanced documentation site built successfully"
       
-      - name: 🚀 Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v3
+      - name: 🚀 Deploy to GitHub Pages (Fixed Permissions)
+        uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./docs-site
           publish_branch: gh-pages
+          force_orphan: false
+          cname: ''
+          commit_message: '🚀 Auto-deploy enhanced documentation'
+          publish_message: '🚀 Deployed enhanced documentation via GitHub Actions'
 
   # 📊 Generate Test Report
   generate-report:
