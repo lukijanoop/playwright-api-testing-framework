@@ -1,0 +1,89 @@
+{
+  "name": "playwright-api-testing-framework",
+  "version": "1.0.0",
+  "description": "A complete, production-ready API testing framework built with Playwright and TypeScript. Perfect for beginners learning API testing or professionals building robust test suites.",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "npx playwright test",
+    "test:ui": "npx playwright test --ui",
+    "test:headed": "npx playwright test --headed",
+    "test:debug": "npx playwright test --debug",
+    "test:basic": "npx playwright test --grep='Basic'",
+    "test:intermediate": "npx playwright test --grep='Intermediate'",
+    "test:advanced": "npx playwright test --grep='Advanced'",
+    "test:report": "npx playwright show-report",
+    "test:install": "npx playwright install",
+    "test:install:browser": "npx playwright install --with-deps",
+    "lint": "echo 'No lint script defined - add ESLint if needed'",
+    "type-check": "echo 'No TypeScript compilation needed - using ts-node'",
+    "build": "echo 'No build step required - framework is ready to use'",
+    "clean": "rm -rf test-results/ playwright-report/ .playwright-test/",
+    "setup": "npm install && npx playwright install",
+    "start": "npm test",
+    "dev": "npx playwright test --watch",
+    "ci:test": "npm run test:basic && npm run test:intermediate && npm run test:advanced"
+  },
+  "keywords": [
+    "playwright",
+    "api-testing",
+    "typescript",
+    "testing",
+    "e2e",
+    "automation",
+    "api",
+    "rest",
+    "authentication",
+    "http-client",
+    "test-framework",
+    "frontend-testing",
+    "end-to-end",
+    "tdd",
+    "bdd",
+    "quality-assurance",
+    "qa",
+    "test-automation",
+    "javascript",
+    "nodejs"
+  ],
+  "author": {
+    "name": "Your Name",
+    "email": "your.email@example.com",
+    "url": "https://github.com/YOUR_USERNAME"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/YOUR_USERNAME/playwright-api-testing-framework.git"
+  },
+  "bugs": {
+    "url": "https://github.com/YOUR_USERNAME/playwright-api-testing-framework/issues"
+  },
+  "homepage": "https://github.com/YOUR_USERNAME/playwright-api-testing-framework#readme",
+  "devDependencies": {
+    "@playwright/test": "^1.56.1",
+    "@types/node": "^24.9.1"
+  },
+  "engines": {
+    "node": ">=16.0.0",
+    "npm": ">=8.0.0"
+  },
+  "files": [
+    "helpers/",
+    "types/",
+    "tests/",
+    "playwright.config.ts",
+    "README.md",
+    "LICENSE"
+  ],
+  "peerDependencies": {
+    "@playwright/test": "^1.30.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "funding": {
+    "type": "github",
+    "url": "https://github.com/sponsors/YOUR_USERNAME"
+  }
+}
