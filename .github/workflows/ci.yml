@@ -67,9 +67,9 @@ jobs:
           fail_ci_if_error: false
           verbose: true
 
-  # 🧪 Install Playwright Browsers
+  # 🧪 Install & Cache Playwright Browsers
   install-browsers:
-    name: 🎭 Install Playwright Browsers
+    name: 🎭 Install & Cache Playwright Browsers
     runs-on: ubuntu-latest
     
     steps:
@@ -81,21 +81,51 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
+          cache-dependency-path: '**/package-lock.json'
       
       - name: 📦 Install Dependencies
-        run: npm ci
+        run: |
+          echo "📦 Installing dependencies with npm cache..."
+          npm ci --prefer-offline --no-audit --progress=false
       
-      - name: 🎭 Install Playwright Browsers
-        run: npx playwright install --with-deps
+      - name: 🎭 Enhanced Browser Caching
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/ms-playwright
+            ~/.npm/_cacache
+          key: playwright-browsers-${{ runner.os }}-${{ env.NODE_VERSION }}-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            playwright-browsers-${{ runner.os }}-${{ env.NODE_VERSION }}-
+            playwright-browsers-${{ runner.os }}-
+      
+      - name: 🎭 Install/Cached Browsers
+        run: |
+          echo "🔍 Checking browser cache..."
+          
+          if [ -d "~/.cache/ms-playwright" ] && [ "$(ls -A ~/.cache/ms-playwright)" ]; then
+            echo "✅ Browsers found in cache, verifying installation..."
+            npx playwright install --list || npx playwright install --with-deps chromium
+          else
+            echo "📥 No cache found or cache empty, installing fresh browsers..."
+            npx playwright install --with-deps chromium
+          fi
+          
+          # Final verification
+          echo "🎯 Verifying Chromium installation..."
+          npx playwright install --list | grep chromium || echo "⚠️ Chromium may need fresh install"
       
       - name: ✅ Verify Browser Installation
-        run: npx playwright install --list
+        run: |
+          echo "📋 Final browser verification:"
+          npx playwright install --list
+          echo "✅ Browser installation completed successfully"
 
   # 🧪 Run API Tests
   api-tests:
     name: 🧪 API Testing Suite (Chrome)
     runs-on: ubuntu-latest
-    needs: [lint-and-type-check]
+    needs: [lint-and-type-check, install-browsers]
         
     steps:
       - name: 📥 Checkout Code
@@ -490,7 +520,9 @@ jobs:
           force_orphan: false
           cname: ''
           commit_message: '🚀 Auto-deploy enhanced documentation'
-          publish_message: '🚀 Deployed enhanced documentation via GitHub Actions'
+          full_commit_message: '🚀 Enhanced documentation deployment via GitHub Actions on $(date)'
+          user_name: 'GitHub Actions'
+          user_email: 'actions@github.com'
 
   # 📊 Generate Test Report
   generate-report:
